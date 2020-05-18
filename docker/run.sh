@@ -1,2 +1,5 @@
-cd ..
-docker run -it -v $PWD:/home/jovyan/dev bergloman:ad_examples bash
+# cd ..
+
+# docker run -it -v $PWD:/home/dev bergloman:ad_examples bash
+
+# docker run -it -v ${PWD}:/home/dev bergloman:ad_examples bash
