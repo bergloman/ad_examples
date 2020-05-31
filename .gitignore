@@ -10,3 +10,4 @@
 *.blg
 temp
 temp-old
+.vscode
