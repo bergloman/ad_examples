@@ -1,0 +1,10 @@
+version: '3.2'
+services:
+  jupyter:
+    image: "bergloman:ad_examples"
+    ports:
+      - "8888:8888"
+    volumes:
+      - type: bind
+        source: ..
+        target: /home/jovyan/work

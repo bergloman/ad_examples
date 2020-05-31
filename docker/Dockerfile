@@ -1,6 +1,6 @@
-FROM python:3.6-slim-buster
+FROM jupyter/scipy-notebook:latest
 
-RUN apt-get update && apt-get install -y bzip2 cron git gzip mc nano tar vim zip && apt-get autoremove -y && apt-get clean
+# RUN apt-get update && apt-get install -y bzip2 cron git gzip mc nano tar vim zip && apt-get autoremove -y && apt-get clean
 
 COPY ./requirements.txt /requirements.txt
 
