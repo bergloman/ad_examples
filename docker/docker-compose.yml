@@ -4,6 +4,8 @@ services:
     image: "bergloman:ad_examples"
     ports:
       - "8888:8888"
+    environment:
+      - GRANT_SUDO=yes
     volumes:
       - type: bind
         source: ..
