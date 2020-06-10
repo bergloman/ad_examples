@@ -10,6 +10,9 @@
 docker-compose -f docker-compose.yml up
 
 # iforest
+# bash ./aad.sh datacenter123 35 1 0.03 7 1 0 0 512 0 1 1
+
+# iforest streaming
 # bash ./aad.sh datacenter123 35 1 0.03 7 1 0 1 512 0 1 1
 
 # loda

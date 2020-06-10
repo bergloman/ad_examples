@@ -27,17 +27,27 @@ logger = logging.getLogger(__name__)
 # # run interactive anomaly detection loop
 # model, x_transformed, queried, ridxs_counts, region_extents = detect_anomalies_and_describe(x, y, opts)
 
+def convert_scores_to_classes(scores, anomaly_ratio):
+    """
+    Converts list of scores to flags (0/1) - top anomalies are marked as 1.
+    """
+    anomaly_cnt = int(len(scores) * anomaly_ratio)
+    anomaly_indices = np.array(scores).argsort()[-anomaly_cnt:][::-1]
+    y_pred = np.zeros(len(scores))
+    np.put(y_pred, anomaly_indices, 1)
+    return y_pred
 
 ad_type="loda"
 rnd.seed(42)
 
 print("loading csv...")
-data_df = read_csv("../notebooks/data/simple.type123.csv", header=True)
+data_df = read_csv("./data/simple.type123.csv", header=True)
+
 print("transforming data...")
 x, y = dataframe_to_matrix(data_df)
 
 n = x.shape[0]
-outliers_fraction = 0.01
+# outliers_fraction = 0.01
 xx = yy = x_grid = Z = scores = None
 
 print("running LODA...")
@@ -51,4 +61,4 @@ scores = -ad.decision_function(x)
 print("scores:\n%s" % str(list(scores)))
 top_anoms = np.argsort(-scores)[np.arange(10)]
 
-
+print("top anomalies:\n%s" % str(list(top_anoms)))
