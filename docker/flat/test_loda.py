@@ -2,6 +2,7 @@ import logging
 import numpy as np
 import os
 import numpy.random as rnd
+from sklearn.metrics import f1_score
 
 from ad_examples.common.utils import read_csv, dataframe_to_matrix
 from ad_examples.common.gen_samples import get_synthetic_samples
@@ -41,13 +42,14 @@ ad_type="loda"
 rnd.seed(42)
 
 print("loading csv...")
-data_df = read_csv("./data/simple.type123.csv", header=True)
+# data_df = read_csv("./data/simple.type123.csv", header=True)
+data_df = read_csv("./data/single.type123.csv", header=True)
 
 print("transforming data...")
 x, y = dataframe_to_matrix(data_df)
 
 n = x.shape[0]
-# outliers_fraction = 0.01
+outliers_fraction = np.sum(y) / len(y)
 xx = yy = x_grid = Z = scores = None
 
 print("running LODA...")
@@ -58,7 +60,12 @@ print("Evaluating...")
 scores = -ad.decision_function(x)
 # Z = -ad.decision_function(x_grid)
 
-print("scores:\n%s" % str(list(scores)))
-top_anoms = np.argsort(-scores)[np.arange(10)]
+# print("scores:\n%s" % str(list(scores)))
+# top_anoms = np.argsort(-scores)[np.arange(10)]
 
-print("top anomalies:\n%s" % str(list(top_anoms)))
+# print("top anomalies:\n%s" % str(list(top_anoms)))
+
+y_pred = convert_scores_to_classes(scores, outliers_fraction)
+
+f1 = f1_score(y, y_pred, average='weighted')
+print("F1={:f}".format(f1))
