@@ -1,7 +1,10 @@
 #!/bin/bash
 
 # To run:
-# bash ./aad.sh <dataset> <budget> <reruns> <tau> <detector_type> <query_type> <query_confident[0|1]> <streaming[0|1]> <streaming_window> <retention_type[0|1]> <with_prior[0|1]> <init_type[0|1|2]>
+# bash ./aad.sh <dataset> \
+#    <budget> <reruns> <tau> <detector_type> \
+#    <query_type> <query_confident[0|1]> <streaming[0|1]> <streaming_window> \
+#    <retention_type[0|1]> <with_prior[0|1]> <init_type[0|1|2]>
 #
 # =========
 # Examples:
@@ -18,6 +21,13 @@
 # Compute angle between optimal hyperplane and uniform weight Isolation Forest
 # -------------------------------
 # bash ./aad.sh toy2 35 1 0.03 7 1 0 2 512 0 1 1
+#
+#
+# bash ./aad.sh datacenter1 \
+#     35 1 0.03 7 \
+#     1 0 1 2016 \
+#     1 1 1
+# bash ./aad.sh datacenter1 35 1 0.03 7 1 0 1 2016 1 1 1
 
 ARGC=$#
 if [[ "$ARGC" -gt "0" ]]; then

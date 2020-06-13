@@ -39,11 +39,14 @@ def convert_scores_to_classes(scores, anomaly_ratio):
     return y_pred
 
 ad_type="loda"
+data_type = "type123"
+data_size="complex"
+
 rnd.seed(42)
 
-print("loading csv...")
-# data_df = read_csv("./data/simple.type123.csv", header=True)
-data_df = read_csv("./data/single.type123.csv", header=True)
+print("loading csv (%s %s)..." % (data_size, data_type))
+data_df = read_csv("./data/%s.%s.csv" % (data_size, data_type), header=True)
+# data_df = read_csv("./data/single.type123.csv", header=True)
 
 print("transforming data...")
 x, y = dataframe_to_matrix(data_df)
@@ -64,8 +67,10 @@ scores = -ad.decision_function(x)
 # top_anoms = np.argsort(-scores)[np.arange(10)]
 
 # print("top anomalies:\n%s" % str(list(top_anoms)))
-
+print("Converting scores to classes...")
 y_pred = convert_scores_to_classes(scores, outliers_fraction)
 
-f1 = f1_score(y, y_pred, average='weighted')
-print("F1={:f}".format(f1))
+print("Calculating F1 scores...")
+f1 = f1_score(y, y_pred, average=None) # average='weighted')
+# print("F1={:f}".format(f1))
+print(f1)
