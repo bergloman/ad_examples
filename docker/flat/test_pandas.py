@@ -1,11 +1,13 @@
 import logging
 import numpy as np
 import os
+import tensorflow as tf
 import numpy.random as rnd
 from sklearn.metrics import f1_score
 
 from ad_examples.common.utils import read_csv, dataframe_to_matrix
 from ad_examples.common.gen_samples import get_synthetic_samples
+from ad_examples.common.nn_utils import AutoencoderAnomalyDetector
 from ad_examples.aad.aad_support import AadOpts, get_aad_command_args, configure_logger
 from ad_examples.aad.forest_description import CompactDescriber, MinimumVolumeCoverDescriber, BayesianRulesetsDescriber, get_region_memberships
 from ad_examples.aad.demo_aad import get_debug_args, detect_anomalies_and_describe
@@ -42,8 +44,18 @@ def slice_data(x, y, idx_from, idx_to):
 def run_loda(x_old, scores_old, x_new, outliers_fraction):
     rnd.seed(42)
 
-    print("running LODA...")
-    ad = Loda(mink=100, maxk=200)
+    # print("running LODA...")
+    # ad = Loda(mink=100, maxk=200)
+
+    print("running auto-encoder...")
+    input_dims = x_old.shape[1]
+    ad = AutoencoderAnomalyDetector(
+        n_inputs = input_dims,
+        n_neurons = [2 * input_dims, round( input_dims/ 5), 2 * input_dims],
+        normalize_scale = True,
+        activations=[tf.nn.tanh, tf.nn.tanh, tf.nn.tanh, None]
+    )
+
     ad.fit(x_old)
     if len(scores_old) == 0:
         print("Calculating inital scores")
@@ -53,8 +65,8 @@ def run_loda(x_old, scores_old, x_new, outliers_fraction):
     scores = -ad.decision_function(x_new)
 
     print("Combining with historic scores and converting to classes...")
-    print(scores_old)
-    print(scores)
+    # print(scores_old)
+    # print(scores)
     scores_combined = np.concatenate((np.array(scores_old), np.array(scores)), 0)
     y_pred_combined = convert_scores_to_classes(scores_combined, outliers_fraction)
     y_pred = y_pred_combined[len(scores_old):]

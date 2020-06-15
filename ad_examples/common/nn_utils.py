@@ -162,9 +162,9 @@ class Autoencoder(object):
         self.noise_level = noise_level
         self.session = None
 
-        tf.set_random_seed(42)
+        tf.compat.v1.random.set_random_seed(42)
 
-        self.x = tf.placeholder(tf.float32, shape=(None, n_inputs), name="x")
+        self.x = tf.compat.v1.placeholder(tf.float32, shape=(None, n_inputs), name="x")
         if denoising:
             self.x_noisy = self.x + self.noise_level * tf.random_normal(tf.shape(self.x))
         else:
