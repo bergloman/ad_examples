@@ -39,16 +39,8 @@ def slice_data(x, y, idx_from, idx_to):
     return (x[idx_from:idx_to, :], y[idx_from:idx_to])
 
 
-def run_loda(x_old, scores_old, x, outliers_fraction):
-    # ad_type="loda"
-    # data_type = "type123"
-    # data_size="complex"
-
+def run_loda(x_old, scores_old, x_new, outliers_fraction):
     rnd.seed(42)
-
-    n = x.shape[0]
-    # outliers_fraction = np.sum(y) / len(y)
-    # xx = yy = x_grid = Z = scores = None
 
     print("running LODA...")
     ad = Loda(mink=100, maxk=200)
@@ -58,51 +50,37 @@ def run_loda(x_old, scores_old, x, outliers_fraction):
         scores_old = -ad.decision_function(x_old)
 
     print("Evaluating...")
-    scores = -ad.decision_function(x)
+    scores = -ad.decision_function(x_new)
 
     print("Combining with historic scores and converting to classes...")
     print(scores_old)
     print(scores)
-    scores_combined = np.concatenate(scores_old, scores)
+    scores_combined = np.concatenate((np.array(scores_old), np.array(scores)), 0)
     y_pred_combined = convert_scores_to_classes(scores_combined, outliers_fraction)
     y_pred = y_pred_combined[len(scores_old):]
 
-    # print("Calculating F1 scores...")
-    # f1 = f1_score(y, y_pred, average=None) # average='weighted')
-    # print(f1)
-
     return (scores_combined, y_pred)
 
-# print(x)
-
-# n = x.shape[0]
-# print(x.shape)
-
-# print(y)
-# print(y.shape)
-
-# print( y[0:3])
-
-# print( x[1:3, 0:4])
-# print( x[0:3, 0:5])
+#################################################################################
 
 (gt_x, gt_y) = load_data()
 # print(gt_x.shape)
 
 day_rec_cnt = 24 * 12
-block_size = 70 * day_rec_cnt
-idx_start = 160 * day_rec_cnt
+block_size = 100 * day_rec_cnt
+idx_start = 200 * day_rec_cnt
 idx_curr_time = idx_start
 n = gt_y.shape[0]
 scores_all = None
 y_pred = np.zeros(0)
+outlier_fraction = 0.01
 
 while idx_curr_time < n :
     print(n, idx_curr_time, block_size)
     (x1, y1) = slice_data(gt_x, gt_y, 0, idx_curr_time)
     (x2, y2) = slice_data(gt_x, gt_y, idx_curr_time, idx_curr_time + block_size)
-    (scores_all, y_pred_new) = run_loda(x1, scores_all, x2, 0.01)
-    y_pred = np.concatenate((y_pred, y_pred_new), 0)
+    (scores_all, y_pred_new) = run_loda(x1, scores_all, x2, outlier_fraction)
+    y_pred = np.concatenate((np.array(y_pred), np.array(y_pred_new)), 0)
     idx_curr_time = idx_curr_time + block_size
 
 print("finished with training, analyzing combined output")
