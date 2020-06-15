@@ -45,7 +45,7 @@ def run_loda(x_old, scores_old, x_new, outliers_fraction):
     print("running LODA...")
     ad = Loda(mink=100, maxk=200)
     ad.fit(x_old)
-    if scores_old == None:
+    if len(scores_old) == 0:
         print("Calculating inital scores")
         scores_old = -ad.decision_function(x_old)
 
@@ -64,14 +64,13 @@ def run_loda(x_old, scores_old, x_new, outliers_fraction):
 #################################################################################
 
 (gt_x, gt_y) = load_data()
-# print(gt_x.shape)
 
 day_rec_cnt = 24 * 12
-block_size = 100 * day_rec_cnt
-idx_start = 200 * day_rec_cnt
+block_size = 7 * day_rec_cnt
+idx_start = 60 * day_rec_cnt
 idx_curr_time = idx_start
 n = gt_y.shape[0]
-scores_all = None
+scores_all = np.zeros(0)
 y_pred = np.zeros(0)
 outlier_fraction = 0.01
 
