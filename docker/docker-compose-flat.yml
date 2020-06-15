@@ -1,0 +1,12 @@
+version: '3.2'
+services:
+  jupyter:
+    image: "tensorflow/tensorflow:2.1.1-jupyter"
+    ports:
+      - "8888:8888"
+    environment:
+      - GRANT_SUDO=yes
+    volumes:
+      - type: bind
+        source: ..
+        target: /home/jovyan/work
