@@ -18,7 +18,6 @@ from numpy import random
 from scipy.sparse import issparse
 
 import numbers
-from sklearn.externals import six
 from sklearn.tree import ExtraTreeRegressor
 from sklearn.utils import check_random_state, check_array
 
