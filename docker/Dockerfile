@@ -1,4 +1,4 @@
-FROM jupyter/scipy-notebook:latest
+FROM tensorflow/tensorflow:2.1.1-jupyter
 
 # RUN apt-get update && apt-get install -y bzip2 cron git gzip mc nano tar vim zip && apt-get autoremove -y && apt-get clean
 
