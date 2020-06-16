@@ -10,10 +10,8 @@
 
 # docker run -it -v $PWD:/home/jovyan/work -e GRANT_SUDO=yes tensorflow/tensorflow:2.1.1 bash
 
-
-docker-compose -f docker-compose.yml up
-
-# docker-compose -f docker-compose-flat.yml up
+docker-compose -f docker/docker-compose-flat.yml up
+# docker-compose -f docker/docker-compose.yml up
 
 # iforest
 # bash ./aad.sh datacenter123 35 1 0.03 7 1 0 0 512 0 1 1

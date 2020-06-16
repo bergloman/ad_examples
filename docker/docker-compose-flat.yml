@@ -1,7 +1,8 @@
 version: '3.2'
 services:
   jupyter:
-    image: "tensorflow/tensorflow:2.1.1-jupyter"
+    # image: "tensorflow/tensorflow:2.1.1-jupyter"
+    image: "bergloman:ad_examples"
     ports:
       - "8888:8888"
     environment:
@@ -9,4 +10,4 @@ services:
     volumes:
       - type: bind
         source: ..
-        target: /home/jovyan/work
+        target: /tf/jovyan/work2

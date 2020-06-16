@@ -5,4 +5,5 @@ FROM tensorflow/tensorflow:2.1.1-jupyter
 COPY ./requirements.txt /requirements.txt
 
 RUN pip install -r /requirements.txt
-RUN pip install git+https://github.com/shubhomoydas/ad_examples.git
+# WORKDIR /home/jovyan
+# RUN pip install git+https://github.com/shubhomoydas/ad_examples.git
