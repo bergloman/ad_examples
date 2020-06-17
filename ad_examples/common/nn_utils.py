@@ -18,7 +18,7 @@ def dnn_layer(x, n_neurons, name, activation=None):
     with tf.name_scope(name):
         n_inputs = int(x.get_shape()[1])
         stddev = 2. / np.sqrt(n_inputs)
-        init = tf.truncated_normal((n_inputs, n_neurons), stddev=stddev)
+        init = tf.random.truncated_normal((n_inputs, n_neurons), stddev=stddev)
         W = tf.Variable(init, name="W")
         b = tf.Variable(tf.zeros([n_neurons]), name="bias")
         Z = tf.matmul(x, W) + b
@@ -57,8 +57,8 @@ class DenseDNN(object):
     def training_op(self, loss, learning_rate=0.01):
         with tf.name_scope("train"):
             # optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate)
-            optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
-            training_op = optimizer.minimize(loss)
+            optimizer = tf.optimizers.Adam(learning_rate=learning_rate)
+            training_op = optimizer.minimize(loss, var_list=None)
         return training_op
 
 
@@ -162,6 +162,7 @@ class Autoencoder(object):
         self.noise_level = noise_level
         self.session = None
 
+        tf.compat.v1.disable_eager_execution()
         tf.compat.v1.random.set_random_seed(42)
 
         self.x = tf.compat.v1.placeholder(tf.float32, shape=(None, n_inputs), name="x")
@@ -183,7 +184,7 @@ class Autoencoder(object):
             self.output = self.dnn.output()
             self.mse_loss = self.dnn.mse_loss(self.x)
             if self.l2_penalty > 0:
-                vars = tf.trainable_variables()
+                vars = tf.compat.v1.trainable_variables()
                 loss_l2 = tf.add_n([tf.nn.l2_loss(v) for v in vars if 'bias' not in v.name]) * self.l2_penalty
                 self.mse_loss = self.mse_loss + loss_l2
 
