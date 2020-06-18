@@ -13,6 +13,10 @@
 docker-compose -f docker/docker-compose-flat.yml up
 # docker-compose -f docker/docker-compose.yml up
 
+# docker run -it -v $PWD:/tf/jovyan/work bergloman:ad_examples bash
+# docker run -it -v ${PWD}:/tf/jovyan/work bergloman:ad_examples bash
+
+
 # iforest
 # bash ./aad.sh datacenter123 35 1 0.03 7 1 0 0 512 0 1 1
 
