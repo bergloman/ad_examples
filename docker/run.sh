@@ -10,7 +10,8 @@
 
 # docker run -it -v $PWD:/home/jovyan/work -e GRANT_SUDO=yes tensorflow/tensorflow:2.1.1 bash
 
-docker-compose -f docker/docker-compose-flat.yml up
+# docker-compose -f docker/docker-compose-flat.yml up
+docker-compose -f docker/docker-compose-flat.yml run jupyter //bin/bash
 # docker-compose -f docker/docker-compose.yml up
 
 # docker run -it -v $PWD:/tf/jovyan/work bergloman:ad_examples bash
