@@ -46,20 +46,20 @@ def slice_data(x, y, idx_from, idx_to):
     return (x[idx_from:idx_to, :], y[idx_from:idx_to])
 
 
-def run_loda(x_old, scores_old, x_new, outliers_fraction):
+def run_detector(x_old, scores_old, x_new, outliers_fraction):
     rnd.seed(42)
 
-    # print("running LODA...")
-    # ad = Loda(mink=100, maxk=200)
+    print("running LODA...")
+    ad = Loda(mink=100, maxk=200)
 
-    print("running auto-encoder...")
-    input_dims = x_old.shape[1]
-    ad = AutoencoderAnomalyDetector(
-        n_inputs = input_dims,
-        n_neurons = [2 * input_dims, round( input_dims/ 5), 2 * input_dims],
-        normalize_scale = True,
-        activations=[tf.nn.tanh, tf.nn.tanh, tf.nn.tanh, None]
-    )
+    # print("running auto-encoder...")
+    # input_dims = x_old.shape[1]
+    # ad = AutoencoderAnomalyDetector(
+    #     n_inputs = input_dims,
+    #     n_neurons = [2 * input_dims, round( input_dims/ 5), 2 * input_dims],
+    #     normalize_scale = True,
+    #     activations=[tf.nn.tanh, tf.nn.tanh, tf.nn.tanh, None]
+    # )
 
     ad.fit(x_old)
     if len(scores_old) == 0:
@@ -89,13 +89,13 @@ idx_curr_time = idx_start
 n = gt_y.shape[0]
 scores_all = np.zeros(0)
 y_pred = np.zeros(0)
-outlier_fraction = 0.01
+outlier_fraction = 0.03
 
 while idx_curr_time < n :
     print(n, idx_curr_time, block_size)
     (x1, y1) = slice_data(gt_x, gt_y, 0, idx_curr_time)
     (x2, y2) = slice_data(gt_x, gt_y, idx_curr_time, idx_curr_time + block_size)
-    (scores_all, y_pred_new) = run_loda(x1, scores_all, x2, outlier_fraction)
+    (scores_all, y_pred_new) = run_detector(x1, scores_all, x2, outlier_fraction)
     y_pred = np.concatenate((np.array(y_pred), np.array(y_pred_new)), 0)
     idx_curr_time = idx_curr_time + block_size
     y_tmp = gt_y[idx_start:idx_curr_time]
