@@ -49,17 +49,17 @@ def slice_data(x, y, idx_from, idx_to):
 def run_loda(x_old, scores_old, x_new, outliers_fraction):
     rnd.seed(42)
 
-    # print("running LODA...")
-    # ad = Loda(mink=100, maxk=200)
+    print("running LODA...")
+    ad = Loda(mink=100, maxk=200)
 
-    print("running auto-encoder...")
-    input_dims = x_old.shape[1]
-    ad = AutoencoderAnomalyDetector(
-        n_inputs = input_dims,
-        n_neurons = [2 * input_dims, round( input_dims/ 5), 2 * input_dims],
-        normalize_scale = True,
-        activations=[tf.nn.tanh, tf.nn.tanh, tf.nn.tanh, None]
-    )
+    # print("running auto-encoder...")
+    # input_dims = x_old.shape[1]
+    # ad = AutoencoderAnomalyDetector(
+    #     n_inputs = input_dims,
+    #     n_neurons = [2 * input_dims, round( input_dims/ 5), 2 * input_dims],
+    #     normalize_scale = True,
+    #     activations=[tf.nn.tanh, tf.nn.tanh, tf.nn.tanh, None]
+    # )
 
     ad.fit(x_old)
     if len(scores_old) == 0:
