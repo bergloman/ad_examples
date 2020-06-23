@@ -36,14 +36,7 @@ def load_data():
     print("loading csv...")
     data_df = read_csv("../notebooks/data/simple.type123.csv", header=True)
 
-    print("filtering out some columns...")
-    cols = list(data_df.columns)
-    cols_to_drop1 = [x for x in cols if x.endswith(".errors")]
-    cols_to_drop2 = [x for x in cols if x.endswith(".requests")]
-    data_df = data_df.drop(cols_to_drop1, axis=1)
-    data_df = data_df.drop(cols_to_drop2, axis=1)
-
-    print("transforming data to matrix...")
+    print("transforming data...")
     x, y = dataframe_to_matrix(data_df)
     return (x, y)
 
@@ -53,7 +46,7 @@ def slice_data(x, y, idx_from, idx_to):
     return (x[idx_from:idx_to, :], y[idx_from:idx_to])
 
 
-def run_detector(x_old, scores_old, x_new, outliers_fraction):
+def run_loda(x_old, scores_old, x_new, outliers_fraction):
     rnd.seed(42)
 
     print("running LODA...")
@@ -96,13 +89,13 @@ idx_curr_time = idx_start
 n = gt_y.shape[0]
 scores_all = np.zeros(0)
 y_pred = np.zeros(0)
-outlier_fraction = 0.03
+outlier_fraction = 0.01
 
 while idx_curr_time < n :
     print(n, idx_curr_time, block_size)
     (x1, y1) = slice_data(gt_x, gt_y, 0, idx_curr_time)
     (x2, y2) = slice_data(gt_x, gt_y, idx_curr_time, idx_curr_time + block_size)
-    (scores_all, y_pred_new) = run_detector(x1, scores_all, x2, outlier_fraction)
+    (scores_all, y_pred_new) = run_loda(x1, scores_all, x2, outlier_fraction)
     y_pred = np.concatenate((np.array(y_pred), np.array(y_pred_new)), 0)
     idx_curr_time = idx_curr_time + block_size
     y_tmp = gt_y[idx_start:idx_curr_time]
