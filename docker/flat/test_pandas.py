@@ -36,7 +36,14 @@ def load_data():
     print("loading csv...")
     data_df = read_csv("../notebooks/data/simple.type123.csv", header=True)
 
-    print("transforming data...")
+    print("filtering out some columns...")
+    cols = list(data_df.columns)
+    cols_to_drop1 = [x for x in cols if x.endswith(".errors")]
+    cols_to_drop2 = [x for x in cols if x.endswith(".requests")]
+    data_df = data_df.drop(cols_to_drop1, axis=1)
+    data_df = data_df.drop(cols_to_drop2, axis=1)
+
+    print("transforming data to matrix...")
     x, y = dataframe_to_matrix(data_df)
     return (x, y)
 
