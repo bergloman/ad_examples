@@ -19,6 +19,8 @@ from ad_examples.aad.demo_aad import get_debug_args, detect_anomalies_and_descri
 
 from ad_examples.loda.loda import Loda
 
+from .utils import calculateQuantilesForDf
+
 logger = logging.getLogger(__name__)
 
 def convert_scores_to_classes(scores, anomaly_ratio):
@@ -42,6 +44,7 @@ def load_data():
     cols_to_drop2 = [x for x in cols if x.endswith(".requests")]
     data_df = data_df.drop(cols_to_drop1, axis=1)
     data_df = data_df.drop(cols_to_drop2, axis=1)
+    calculateQuantilesForDf(data_df, 300, ["is_anomaly"])
 
     print("transforming data to matrix...")
     x, y = dataframe_to_matrix(data_df)
