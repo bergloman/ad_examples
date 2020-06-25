@@ -21,4 +21,5 @@ def calculateQuantilesForDf(df, min_tdigest_items, cols_to_skip):
     cols = list(df.columns)
     cols_to_process = [x for x in cols if (x in cols_to_skip) == False]
     for x in cols_to_process:
+        print("Processing " + x)
         df[x + "_q"] = calculateQuantiles(df[x], min_tdigest_items)
