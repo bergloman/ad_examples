@@ -5,5 +5,6 @@ FROM python:3.6.10
 COPY ./requirements.txt /requirements.txt
 
 RUN pip install -r /requirements.txt
+RUN pip install tdigest
 # WORKDIR /home/jovyan
 # RUN pip install git+https://github.com/shubhomoydas/ad_examples.git
