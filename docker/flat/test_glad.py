@@ -82,6 +82,61 @@ def run_detector(x_old, scores_old, x_new, outliers_fraction):
 
     return (scores_combined, y_pred)
 
+
+def afss_active_learn_ensemble(x, y, ensemble, opts):
+
+    data_2D = x.shape[1] == 2
+
+    # populate labels as some dummy value (-1) initially
+    y_labeled = np.ones(x.shape[0], dtype=int) * -1
+
+    scores = ensemble.get_scores(x)
+
+    xx = yy = None
+
+    afss = get_afss_model(opts, n_output=ensemble.m)
+
+    afss.init_network(x, prime_network=True)
+
+    baseline_scores = afss.get_weighted_scores(x, scores)
+    baseline_queried = np.argsort(-baseline_scores)
+    baseline_found = np.cumsum(y[baseline_queried[np.arange(opts.budget)]])
+    logger.debug("baseline found:\n%s" % (str(list(baseline_found))))
+
+    queried = []  # labeled instances
+
+    for i in range(opts.budget):
+        tm = Timer()
+        a_scores = afss.get_weighted_scores(x, scores)
+        ordered_indexes = np.argsort(-a_scores)
+        items = get_first_vals_not_marked(ordered_indexes, queried, start=0, n=1)
+        queried.extend(items)
+        hf = np.array(queried, dtype=int)
+        y_labeled[items] = y[items]
+
+        afss.update_afss(x, y_labeled, hf, scores, tau=opts.afss_tau)
+        logger.debug(tm.message("finished budget %d:" % (i+1)))
+
+
+    afss.close_session()
+
+    # the number of anomalies discovered within the budget while incorporating feedback
+    # logger.debug("queried:\n%s" % str(queried))
+    # logger.debug("y_labeled:\n%s" % str(list(y_labeled[queried])))
+    found = np.cumsum(y[queried])
+    logger.debug("GLAD found:\n%s" % (str(list(found))))
+
+    # make queried indexes 1-indexed
+    queried = np.array(queried, dtype=int) + 1
+    baseline_queried = np.array(baseline_queried[0:opts.budget], dtype=int) + 1
+
+    results = SequentialResults(num_seen=found, num_seen_baseline=baseline_found,
+                                queried_indexes=queried,
+                                queried_indexes_baseline=baseline_queried)
+    return results
+
+
+
 def run_glad(x_old, scores_old, x_new, outliers_fraction):
     rnd.seed(42)
 
@@ -112,7 +167,7 @@ def run_glad(x_old, scores_old, x_new, outliers_fraction):
         results = afss_active_learn_ensemble(x, y, ensemble, opts)
         all_results.merge(results)
 
-        logger.debug(tm.message("completed run %d/%d:" % (i+1, opts.reruns)))
+        logger.debug(tm.message("completed run %d/%d:" % (i+1, reruns)))
 
     if not opts.ensemble_only:
         all_results.write_to_csv(opts)
