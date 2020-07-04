@@ -85,17 +85,11 @@ def run_detector(x_old, scores_old, x_new, outliers_fraction):
 
 def afss_active_learn_ensemble(x, y, ensemble, opts):
 
-    data_2D = x.shape[1] == 2
-
     # populate labels as some dummy value (-1) initially
     y_labeled = np.ones(x.shape[0], dtype=int) * -1
-
     scores = ensemble.get_scores(x)
 
-    xx = yy = None
-
     afss = get_afss_model(opts, n_output=ensemble.m)
-
     afss.init_network(x, prime_network=True)
 
     baseline_scores = afss.get_weighted_scores(x, scores)
@@ -136,7 +130,7 @@ def afss_active_learn_ensemble(x, y, ensemble, opts):
     return results
 
 
-
+# run glad for new batch (e.g. week)
 def run_glad(x_old, scores_old, x_new, outliers_fraction):
     rnd.seed(42)
 
@@ -214,6 +208,18 @@ n = gt_y.shape[0]
 scores_all = np.zeros(0)
 y_pred = np.zeros(0)
 outlier_fraction = 0.03
+
+# create LODA ensemble for the initial batch
+# initialize GLAD NN + allow some AAD training
+
+# for each week:
+#    use trained GLAD + fixed LODA to assign scores
+#    update GLAD with AAD to get more classified examples
+
+
+
+
+
 
 while idx_curr_time < n :
     print(n, idx_curr_time, block_size)
