@@ -115,12 +115,22 @@ def get_afss_modelx(opts, n_output=1):
 
     return afss
 
-def afss_active_learn_ensemble(x, y, ensemble, opts):
+def afss_active_learn_ensemblex(x, y, ensemble, queried, opts):
+    """ Create GLAD for given ensemble and data
+
+        :param x: data
+        :param y: anomaly indications
+        :param ensemble: LODA ensemble to use
+        :param queried: labeled instances
+        :param opts: additional options
+    """
 
     # populate labels as some dummy value (-1) initially
     y_labeled = np.ones(x.shape[0], dtype=int) * -1
+    # find raw scores from ensemble for current data
     scores = ensemble.get_scores(x)
 
+    # initialize GLAD network
     afss = get_afss_modelx(opts, n_output=ensemble.m)
     afss.init_network(x, prime_network=True)
 
@@ -128,8 +138,6 @@ def afss_active_learn_ensemble(x, y, ensemble, opts):
     baseline_queried = np.argsort(-baseline_scores)
     baseline_found = np.cumsum(y[baseline_queried[np.arange(opts.budget)]])
     logger.debug("baseline found:\n%s" % (str(list(baseline_found))))
-
-    queried = []  # labeled instances
 
     for i in range(opts.budget):
         tm = Timer()
@@ -163,11 +171,10 @@ def afss_active_learn_ensemble(x, y, ensemble, opts):
 
 
 # run glad for new batch (e.g. week)
-def run_glad(x_old, scores_old, x_new, outliers_fraction):
+def run_glad(x_old, y_old, x_new, y_new, ensemble, queried, opts):
     rnd.seed(42)
 
     all_results = SequentialResults()
-    ensembles = []
 
     reruns = 3
     budget = 30
@@ -177,30 +184,19 @@ def run_glad(x_old, scores_old, x_new, outliers_fraction):
     loda_mink = 100
     loda_maxk = 200
 
-    print("running GLAD...")
-    for i in range(reruns):
-        tm = Timer()
+    print("running GLAD block ...")
+    randseed = orig_randseed
+    runidx = 1
+    set_random_seeds(randseed, randseed + 1, randseed + 2)
 
-        randseed = orig_randseed + i
-        runidx = i + 1
-        set_random_seeds(randseed, randseed + 1, randseed + 2)
+    # ensemble = prepare_loda_ensemble(x, mink=loda_mink, maxk=loda_maxk, debug=False, m=4)
+    logger.debug("#LODA projections: %d" % ensemble.m)
 
-        ensemble = prepare_loda_ensemble(x, mink=loda_mink, maxk=loda_maxk, debug=False, m=4)
-        logger.debug("#LODA projections: %d" % ensemble.m)
+    afss_active_learn_ensemblex(x, y, ensemble, opts)
 
-        ensembles.append(ensemble)
+    logger.debug("completed run of GLAD block")
 
-        results = afss_active_learn_ensemble(x, y, ensemble, opts)
-        all_results.merge(results)
-
-        logger.debug(tm.message("completed run %d/%d:" % (i+1, reruns)))
-
-    if not opts.ensemble_only:
-        all_results.write_to_csv(opts)
-    else:
-        all_results = None
-
-    return x, y, all_results, ensembles
+    return queried
 
     # print("running auto-encoder...")
     # input_dims = x_old.shape[1]
@@ -240,6 +236,7 @@ n = gt_y.shape[0]
 scores_all = np.zeros(0)
 y_pred = np.zeros(0)
 outlier_fraction = 0.03
+queried = []
 
 opts = {
     afss_l2_lambda: 1e-3,
@@ -251,7 +248,8 @@ opts = {
     train_batch_size: 25,
     n_epochs: 200,
     max_afss_epochs: 1
-    afss_max_labeled_reps: 5
+    afss_max_labeled_reps: 5,
+    budget: 3 * 7 # number of active-learning questions allowed per block (i.e. single week)
 }
 
 # activations=activations, bias_prob=opts.afss_bias_prob,
@@ -268,6 +266,8 @@ loda_model.fit(x)
 ensemble = AnomalyEnsembleLoda(loda_model)
 
 # initialize GLAD NN + allow some AAD training
+(x_init, y_init) = slice_data(gt_x, gt_y, 0, idx_curr_time)
+(queried) = run_glad([], [], x_init, y_init, ensemble, [], opts)
 
 # for each week:
 #    use trained GLAD + fixed LODA to assign scores
