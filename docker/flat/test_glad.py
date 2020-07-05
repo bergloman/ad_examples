@@ -83,13 +83,45 @@ def run_detector(x_old, scores_old, x_new, outliers_fraction):
     return (scores_combined, y_pred)
 
 
+def get_afss_modelx(opts, n_output=1):
+
+    layer_sizes = [] # opts.afss_nodes
+    if len(layer_sizes) == 0 or any(n < 1 for n in layer_sizes):
+        layer_sizes = [max(50, n_output * 3)]
+        logger.debug("Setting layer_sizes to [%d]" % layer_sizes[0])
+
+    logger.debug("l2_lambda: %f" % opts.afss_l2_lambda)
+    logger.debug("max_afss_epochs: %d" % opts.max_afss_epochs)
+
+    n_neurons = layer_sizes + [n_output]
+
+    names = ["hidden%d" % (i+1) for i in range(len(n_neurons)-1)]
+    names.append("output")
+    activations = []
+    if len(n_neurons) > 2:
+        activations = [tf.nn.leaky_relu] * (len(n_neurons) - 2)
+    activations.extend([tf.nn.sigmoid, None])
+
+    logger.debug("n_neurons (%d): %s" % (len(n_neurons), str(n_neurons)))
+    logger.debug("names: %s" % str(names))
+
+    afss = AFSS(n_neurons=n_neurons, names=names,
+                activations=activations, bias_prob=opts.afss_bias_prob,
+                prime=not opts.afss_no_prime, c_q_tau=opts.afss_c_tau, c_x_tau=opts.afss_c_tau,
+                lambda_prior=opts.afss_lambda_prior, l2_penalty=True, l2_lambda=opts.afss_l2_lambda,
+                train_batch_size=opts.train_batch_size,
+                max_init_epochs=opts.n_epochs, max_afss_epochs=opts.max_afss_epochs,
+                max_labeled_reps=opts.afss_max_labeled_reps)
+
+    return afss
+
 def afss_active_learn_ensemble(x, y, ensemble, opts):
 
     # populate labels as some dummy value (-1) initially
     y_labeled = np.ones(x.shape[0], dtype=int) * -1
     scores = ensemble.get_scores(x)
 
-    afss = get_afss_model(opts, n_output=ensemble.m)
+    afss = get_afss_modelx(opts, n_output=ensemble.m)
     afss.init_network(x, prime_network=True)
 
     baseline_scores = afss.get_weighted_scores(x, scores)
@@ -209,7 +241,32 @@ scores_all = np.zeros(0)
 y_pred = np.zeros(0)
 outlier_fraction = 0.03
 
+opts = {
+    afss_l2_lambda: 1e-3,
+    max_afss_epochs: 1,
+    afss_bias_prob: 0.5,
+    afss_no_prime: False,
+    afss_c_tau: 1.0,
+    afss_lambda_prior: 1.0,
+    train_batch_size: 25,
+    n_epochs: 200,
+    max_afss_epochs: 1
+    afss_max_labeled_reps: 5
+}
+
+# activations=activations, bias_prob=opts.afss_bias_prob,
+# prime=not opts.afss_no_prime, c_q_tau=opts.afss_c_tau, c_x_tau=opts.afss_c_tau,
+# lambda_prior=opts.afss_lambda_prior, l2_penalty=True, l2_lambda=opts.afss_l2_lambda,
+# train_batch_size=opts.train_batch_size,
+# max_init_epochs=opts.n_epochs, max_afss_epochs=opts.max_afss_epochs,
+# max_labeled_reps=opts.afss_max_labeled_reps)
+
+
 # create LODA ensemble for the initial batch
+loda_model = Loda(mink=mink, maxk=maxk)
+loda_model.fit(x)
+ensemble = AnomalyEnsembleLoda(loda_model)
+
 # initialize GLAD NN + allow some AAD training
 
 # for each week:
