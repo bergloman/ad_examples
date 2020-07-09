@@ -171,12 +171,11 @@ def afss_active_learn_ensemblex(x, y, ensemble, queried, opts):
 
 
 # run glad for new batch (e.g. week)
-def run_glad(x_old, y_old, x_new, y_new, ensemble, queried, opts):
+def run_glad(x_old, y_old, x_new, y_new, queried, opts):
     rnd.seed(42)
 
-    all_results = SequentialResults()
+    # all_results = SequentialResults()
 
-    reruns = 3
     budget = 30
     train_batch_size = 100
     afss_nodes = 0
@@ -189,7 +188,11 @@ def run_glad(x_old, y_old, x_new, y_new, ensemble, queried, opts):
     runidx = 1
     set_random_seeds(randseed, randseed + 1, randseed + 2)
 
-    # ensemble = prepare_loda_ensemble(x, mink=loda_mink, maxk=loda_maxk, debug=False, m=4)
+    # create LODA ensemble for the initial batch
+    loda_model = Loda(mink=loda_mink, maxk=loda_maxk)
+    loda_model.fit(x)
+    ensemble = AnomalyEnsembleLoda(loda_model)
+
     logger.debug("#LODA projections: %d" % ensemble.m)
 
     afss_active_learn_ensemblex(x, y, ensemble, opts)
@@ -247,7 +250,7 @@ opts = {
     afss_lambda_prior: 1.0,
     train_batch_size: 25,
     n_epochs: 200,
-    max_afss_epochs: 1
+    max_afss_epochs: 1,
     afss_max_labeled_reps: 5,
     budget: 3 * 7 # number of active-learning questions allowed per block (i.e. single week)
 }
@@ -261,17 +264,18 @@ opts = {
 
 
 # create LODA ensemble for the initial batch
-loda_model = Loda(mink=mink, maxk=maxk)
-loda_model.fit(x)
-ensemble = AnomalyEnsembleLoda(loda_model)
+# loda_model = Loda(mink=mink, maxk=maxk)
+# loda_model.fit(x)
+# ensemble = AnomalyEnsembleLoda(loda_model)
 
 # initialize GLAD NN + allow some AAD training
 (x_init, y_init) = slice_data(gt_x, gt_y, 0, idx_curr_time)
-(queried) = run_glad([], [], x_init, y_init, ensemble, [], opts)
+(queried, scores_old) = run_glad([], [], x_init, y_init, [], opts)
 
 # for each week:
-#    use trained GLAD + fixed LODA to assign scores
-#    update GLAD with AAD to get more classified examples
+#    train new GLAD + LODA on old data
+#    use new GLAD + LODA on new data to assign scores
+#    collect results
 
 
 
