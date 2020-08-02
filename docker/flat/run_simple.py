@@ -9,6 +9,8 @@ import os
 import tensorflow as tf
 import numpy.random as rnd
 from sklearn.metrics import f1_score
+from sklearn.ensemble import IsolationForest
+from sklearn.neighbors import LocalOutlierFactor
 
 from ad_examples.common.utils import read_csv, dataframe_to_matrix
 from ad_examples.common.gen_samples import get_synthetic_samples
@@ -49,8 +51,14 @@ def slice_data(x, y, idx_from, idx_to):
 def run_loda(x_old, scores_old, x_new, outliers_fraction):
     rnd.seed(42)
 
-    print("running LODA...")
-    ad = Loda(mink=100, maxk=200)
+    print("running IFOR...")
+    ad = IsolationForest(max_samples=256, contamination=outliers_fraction, random_state=None)
+
+    # print("running LOF...")
+    # ad = LocalOutlierFactor(n_neighbors=35, contamination=outliers_fraction)
+
+    # print("running LODA...")
+    # ad = Loda(mink=100, maxk=200)
 
     # print("running auto-encoder...")
     # input_dims = x_old.shape[1]
@@ -65,9 +73,11 @@ def run_loda(x_old, scores_old, x_new, outliers_fraction):
     if len(scores_old) == 0:
         print("Calculating inital scores")
         scores_old = -ad.decision_function(x_old)
+        # scores_old = -ad._decision_function(x_old)
 
     print("Evaluating...")
     scores = -ad.decision_function(x_new)
+    # scores = -ad._decision_function(x_new)
 
     print("Combining with historic scores and converting to classes...")
     # print(scores_old)
