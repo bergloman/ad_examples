@@ -36,8 +36,14 @@ def convert_scores_to_classes(scores, anomaly_ratio):
 
 def load_data():
     print("loading csv...")
-    data_df = read_csv("../notebooks/data/simple.type123.csv", header=True)
+    t = "ber"
+    size = "complex"
+    n = "_normalized_hours"
+    # data_df = read_csv("../notebooks/data/simple.type123.csv", header=True)
+    # data_df = read_csv("./data/data_parking/csv/type-ber/simple.type-ber.csv", header=True)
+    data_df = read_csv("./data/data_parking/csv" + n + "/type-" + t + "/" + size + ".type-" + t + ".csv", header=True)
 
+    # print(data_df)
     print("transforming data...")
     x, y = dataframe_to_matrix(data_df)
     return (x, y)
@@ -51,14 +57,14 @@ def slice_data(x, y, idx_from, idx_to):
 def run_loda(x_old, scores_old, x_new, outliers_fraction):
     rnd.seed(42)
 
-    print("running IFOR...")
-    ad = IsolationForest(max_samples=256, contamination=outliers_fraction, random_state=None)
+    # print("running IFOR...")
+    # ad = IsolationForest(max_samples=256, contamination=outliers_fraction, random_state=None)
 
     # print("running LOF...")
     # ad = LocalOutlierFactor(n_neighbors=35, contamination=outliers_fraction)
 
-    # print("running LODA...")
-    # ad = Loda(mink=100, maxk=200)
+    print("running LODA...")
+    ad = Loda(mink=100, maxk=200)
 
     # print("running auto-encoder...")
     # input_dims = x_old.shape[1]
@@ -107,6 +113,7 @@ while idx_curr_time < n :
     (x2, y2) = slice_data(gt_x, gt_y, idx_curr_time, idx_curr_time + block_size)
     (scores_all, y_pred_new) = run_loda(x1, scores_all, x2, outlier_fraction)
     y_pred = np.concatenate((np.array(y_pred), np.array(y_pred_new)), 0)
+    # print(np.sum(y1), np.sum(y2), np.sum(y_pred))
     idx_curr_time = idx_curr_time + block_size
     y_tmp = gt_y[idx_start:idx_curr_time]
     f1 = f1_score(y_tmp, y_pred, average=None) # average='weighted')
