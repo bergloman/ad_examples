@@ -1,12 +1,12 @@
 #! /bin/bash
 
-# ALGOS=("loda", "lof", "ifor")
+ALGOS=("loda" "lof" "ifor")
 # TYPES=("type-b" "type-e" "type-r" "type-be" "type-br" "type-er" "type-ber")
 # SOURCES=("huge" "complex" "simple" "single")
 
-ALGOS=("ifor")
+# ALGOS=("ifor")
 TYPES=("type-ber")
-SOURCES=("simple")
+SOURCES=("complex")
 
 OUTPUT_DIR=out
 mkdir -p $OUTPUT_DIR

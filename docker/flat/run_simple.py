@@ -60,7 +60,7 @@ def run_ad_algorithm(algo_type, x_old, scores_old, x_new, outliers_fraction):
 
     call_mode_normal=True
     ad=None
-
+    print(algo_type)
     if algo_type == "ifor":
         # print("running IFOR...")
         ad = IsolationForest(max_samples=256, contamination=outliers_fraction, random_state=None)
