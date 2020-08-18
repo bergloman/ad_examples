@@ -1,5 +1,7 @@
 # some_file.py
 import sys
+import time
+import json
 # insert at 1, 0 is the script path (or '' in REPL)
 sys.path.insert(1, '/tf/jovyan/work')
 
@@ -118,6 +120,8 @@ scores_all = np.zeros(0)
 y_pred = np.zeros(0)
 outlier_fraction = 0.01
 
+t0 = time.clock()
+
 while idx_curr_time < n :
     print(n, idx_curr_time, block_size)
     (x1, y1) = slice_data(gt_x, gt_y, 0, idx_curr_time)
@@ -130,10 +134,16 @@ while idx_curr_time < n :
     f1 = f1_score(y_tmp, y_pred, average=None) # average='weighted')
     print(f1)
 
+t1 = time.clock()
 
 print("finished with training, analyzing combined output")
 y = gt_y[idx_start:]
 
+print("Elapsed time")
+print(t1 -t0)
+
 print("Calculating F1 scores...")
 f1 = f1_score(y, y_pred, average=None) # average='weighted')
 print(f1)
+
+print(json.dumps({ "time": t1 - t0, "f1": f1[1] }))

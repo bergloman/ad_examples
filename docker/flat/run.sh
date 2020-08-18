@@ -5,9 +5,9 @@ TYPES=("type-b" "type-e" "type-r" "type-be" "type-br" "type-er" "type-ber")
 SOURCES=("huge" "complex" "simple" "single")
 DATA_TYPES=("csv" "csv_normalized_hours")
 
-# ALGOS=("loda")
+# ALGOS=("ifor")
 # TYPES=("type-ber")
-# SOURCES=("complex")
+# SOURCES=("single")
 
 OUTPUT_DIR=out
 mkdir -p $OUTPUT_DIR
