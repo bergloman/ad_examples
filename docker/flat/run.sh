@@ -1,12 +1,12 @@
 #! /bin/bash
 
-# ALGOS=("loda" "lof" "ifor")
-# TYPES=("type-b" "type-e" "type-r" "type-be" "type-br" "type-er" "type-ber")
+ALGOS=("loda" "lof" "ifor")
+TYPES=("type-b" "type-e" "type-r" "type-be" "type-br" "type-er" "type-ber")
 SOURCES=("huge" "complex" "simple" "single")
 DATA_TYPES=("csv" "csv_normalized_hours")
 
-ALGOS=("ifor")
-TYPES=("type-ber")
+# ALGOS=("loda")
+# TYPES=("type-ber")
 # SOURCES=("complex")
 
 OUTPUT_DIR=out
