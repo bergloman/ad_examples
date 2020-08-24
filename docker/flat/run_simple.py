@@ -10,7 +10,7 @@ import numpy as np
 import os
 import tensorflow as tf
 import numpy.random as rnd
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, precision_recall_fscore_support
 from sklearn.ensemble import IsolationForest
 from sklearn.neighbors import LocalOutlierFactor
 
@@ -144,6 +144,8 @@ print(t1 -t0)
 
 print("Calculating F1 scores...")
 f1 = f1_score(y, y_pred, average=None) # average='weighted')
+metrics2 = precision_recall_fscore_support(y_tmp, y_pred, average=None, beta=1)
+metrics05 = precision_recall_fscore_support(y_tmp, y_pred, average=None, beta=0.5)
 print(f1)
 
 print(json.dumps({ "time": t1 - t0, "f1": f1[1] }))
