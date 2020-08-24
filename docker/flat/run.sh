@@ -3,12 +3,12 @@
 #ALGOS=("loda" "lof" "ifor")
 # TYPES=("type-b" "type-e" "type-r" "type-be" "type-br" "type-er" "type-ber")
 # SOURCES=("huge" "complex" "simple" "single")
-# DATA_TYPES=("csv" "csv_normalized_hours")
+DATA_TYPES=("csv" "csv_normalized_hours")
 
-ALGOS=("loda")
-TYPES=("type-ber")
-SOURCES=("single")
-DATA_TYPES=("csv_normalized_hours")
+ALGOS=("ifor" "lof")
+TYPES=("type-e" "type-ber")
+SOURCES=("simple")
+# DATA_TYPES=("csv_normalized_hours")
 
 OUTPUT_DIR=out
 mkdir -p $OUTPUT_DIR

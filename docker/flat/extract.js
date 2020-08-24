@@ -27,8 +27,12 @@ for (const type of types) {
                 .pop();
             // console.log(fname, content)
             try {
-                const f1 = JSON.parse(content).f1;
-                res.push({ size, type, algo, f1 });
+                const data = JSON.parse(content);
+                const precision = data.precision;
+                const recall = data.recall;
+                const f1 = data.f1;
+                const f05 = data.f05;
+                res.push({ size, type, algo, f1, precision, recall, f05 });
                 s += `& ` + f1.toFixed(4);
             } catch (e) {
                 s += `& ERROR `;

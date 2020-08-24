@@ -6,7 +6,7 @@ import numpy as np
 import os
 import tensorflow as tf
 import numpy.random as rnd
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, precision_recall_fscore_support
 
 from ad_examples.common.utils import read_csv, dataframe_to_matrix
 from ad_examples.common.gen_samples import get_synthetic_samples
@@ -34,9 +34,10 @@ def convert_scores_to_classes(scores, anomaly_ratio):
     return y_pred
 
 
-def load_data():
+def load_data(input_file):
     print("loading csv...")
-    data_df = read_csv("../notebooks/data/simple.type123.csv", header=True)
+    # data_df = read_csv("../notebooks/data/simple.type123.csv", header=True)
+    data_df = read_csv(input_file, header=True)
 
     print("transforming data...")
     x, y = dataframe_to_matrix(data_df)
@@ -229,7 +230,7 @@ def run_glad(x_old, y_old, x_new, y_new, queried, opts):
 
 #################################################################################
 
-(gt_x, gt_y) = load_data()
+(gt_x, gt_y) = load_data("data/data_parking/csv/type-ber/simple.type-ber.csv")
 
 day_rec_cnt = 24 * 12
 block_size = 7 * day_rec_cnt
@@ -295,5 +296,7 @@ y = gt_y[idx_start:]
 
 print("Calculating F1 scores...")
 f1 = f1_score(y, y_pred, average=None) # average='weighted')
+prec2, recall2, f05, _ = precision_recall_fscore_support(y_tmp, y_pred, average=None, beta=0.5)
 
 print(f1)
+print(json.dumps({ "time": t1 - t0, "f1": f1[1], "precision": prec2[1], "recall": recall2[1], "f05": f05[1] }))

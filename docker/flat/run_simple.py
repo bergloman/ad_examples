@@ -144,10 +144,6 @@ print(t1 -t0)
 
 print("Calculating F1 scores...")
 f1 = f1_score(y, y_pred, average=None) # average='weighted')
-metrics1 = precision_recall_fscore_support(y_tmp, y_pred, average=None, beta=1)
-metrics05 = precision_recall_fscore_support(y_tmp, y_pred, average=None, beta=0.5)
-print(f1)
-print(metrics1)
-print(metrics05)
+prec2, recall2, f05, _ = precision_recall_fscore_support(y_tmp, y_pred, average=None, beta=0.5)
 
-print(json.dumps({ "time": t1 - t0, "f1": f1[1] }))
+print(json.dumps({ "time": t1 - t0, "f1": f1[1], "precision": prec2[1], "recall": recall2[1], "f05": f05[1] }))
