@@ -73,7 +73,7 @@ def run_ad_algorithm(algo_type, x_old, scores_old, x_new, outliers_fraction):
     elif algo_type == "loda":
         # print("running LODA...")
         ad = Loda(mink=100, maxk=200)
-    
+
     # print("running auto-encoder...")
     # input_dims = x_old.shape[1]
     # ad = AutoencoderAnomalyDetector(
@@ -144,8 +144,10 @@ print(t1 -t0)
 
 print("Calculating F1 scores...")
 f1 = f1_score(y, y_pred, average=None) # average='weighted')
-metrics2 = precision_recall_fscore_support(y_tmp, y_pred, average=None, beta=1)
+metrics1 = precision_recall_fscore_support(y_tmp, y_pred, average=None, beta=1)
 metrics05 = precision_recall_fscore_support(y_tmp, y_pred, average=None, beta=0.5)
 print(f1)
+print(metrics1)
+print(metrics05)
 
 print(json.dumps({ "time": t1 - t0, "f1": f1[1] }))
