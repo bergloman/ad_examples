@@ -1,5 +1,7 @@
 # some_file.py
 import sys
+import time
+import json
 # insert at 1, 0 is the script path (or '' in REPL)
 sys.path.insert(1, '/tf/jovyan/work')
 
@@ -34,10 +36,17 @@ def convert_scores_to_classes(scores, anomaly_ratio):
     return y_pred
 
 
-def load_data():
+def load_data(input_file):
     print("loading csv...")
-    data_df = read_csv("../notebooks/data/simple.type123.csv", header=True)
+    # t = "ber"
+    # size = "simple"
+    # n = "_normalized_hours"
+    # data_df = read_csv("../notebooks/data/simple.type123.csv", header=True)
+    # data_df = read_csv("./data/data_parking/csv/type-ber/simple.type-ber.csv", header=True)
+    #data_df = read_csv("./data/data_parking/csv" + n + "/type-" + t + "/" + size + ".type-" + t + ".csv", header=True)
+    data_df = read_csv(input_file, header=True)
 
+    # print(data_df)
     print("transforming data...")
     x, y = dataframe_to_matrix(data_df)
     return (x, y)
@@ -48,18 +57,23 @@ def slice_data(x, y, idx_from, idx_to):
     return (x[idx_from:idx_to, :], y[idx_from:idx_to])
 
 
-def run_loda(x_old, scores_old, x_new, outliers_fraction):
+def run_ad_algorithm(algo_type, x_old, scores_old, x_new, outliers_fraction):
     rnd.seed(42)
 
-    print("running IFOR...")
-    ad = IsolationForest(max_samples=256, contamination=outliers_fraction, random_state=None)
-
-    # print("running LOF...")
-    # ad = LocalOutlierFactor(n_neighbors=35, contamination=outliers_fraction)
-
-    # print("running LODA...")
-    # ad = Loda(mink=100, maxk=200)
-
+    call_mode_normal=True
+    ad=None
+    print(algo_type)
+    if algo_type == "ifor":
+        # print("running IFOR...")
+        ad = IsolationForest(max_samples=256, contamination=outliers_fraction, random_state=None)
+    elif algo_type == "lof":
+        # print("running LOF...")
+        ad = LocalOutlierFactor(n_neighbors=35, contamination=outliers_fraction)
+        call_mode_normal=False
+    elif algo_type == "loda":
+        # print("running LODA...")
+        ad = Loda(mink=100, maxk=200)
+    
     # print("running auto-encoder...")
     # input_dims = x_old.shape[1]
     # ad = AutoencoderAnomalyDetector(
@@ -71,17 +85,19 @@ def run_loda(x_old, scores_old, x_new, outliers_fraction):
 
     ad.fit(x_old)
     if len(scores_old) == 0:
-        print("Calculating inital scores")
-        scores_old = -ad.decision_function(x_old)
-        # scores_old = -ad._decision_function(x_old)
+        # print("Calculating inital scores")
+        if call_mode_normal == True:
+            scores_old = -ad.decision_function(x_old)
+        else:
+            scores_old = -ad._decision_function(x_old)
 
-    print("Evaluating...")
-    scores = -ad.decision_function(x_new)
-    # scores = -ad._decision_function(x_new)
+    # print("Evaluating...")
+    if call_mode_normal == True:
+        scores = -ad.decision_function(x_new)
+    else:
+        scores = -ad._decision_function(x_new)
 
-    print("Combining with historic scores and converting to classes...")
-    # print(scores_old)
-    # print(scores)
+    # print("Combining with historic scores and converting to classes...")
     scores_combined = np.concatenate((np.array(scores_old), np.array(scores)), 0)
     y_pred_combined = convert_scores_to_classes(scores_combined, outliers_fraction)
     y_pred = y_pred_combined[len(scores_old):]
@@ -90,7 +106,10 @@ def run_loda(x_old, scores_old, x_new, outliers_fraction):
 
 #################################################################################
 
-(gt_x, gt_y) = load_data()
+args = sys.argv
+print(args)
+algo=args[2]
+(gt_x, gt_y) = load_data(args[1])
 
 day_rec_cnt = 24 * 12
 block_size = 7 * day_rec_cnt
@@ -101,23 +120,32 @@ scores_all = np.zeros(0)
 y_pred = np.zeros(0)
 outlier_fraction = 0.01
 
+t0 = time.clock()
+
 while idx_curr_time < n :
     print(n, idx_curr_time, block_size)
     (x1, y1) = slice_data(gt_x, gt_y, 0, idx_curr_time)
     (x2, y2) = slice_data(gt_x, gt_y, idx_curr_time, idx_curr_time + block_size)
-    (scores_all, y_pred_new) = run_loda(x1, scores_all, x2, outlier_fraction)
+    (scores_all, y_pred_new) = run_ad_algorithm(algo, x1, scores_all, x2, outlier_fraction)
     y_pred = np.concatenate((np.array(y_pred), np.array(y_pred_new)), 0)
+    # print(np.sum(y1), np.sum(y2), np.sum(y_pred))
     idx_curr_time = idx_curr_time + block_size
     y_tmp = gt_y[idx_start:idx_curr_time]
     f1 = f1_score(y_tmp, y_pred, average=None) # average='weighted')
     print(f1)
 
+t1 = time.clock()
 
 print("finished with training, analyzing combined output")
 y = gt_y[idx_start:]
+
+print("Elapsed time")
+print(t1 -t0)
 
 print("Calculating F1 scores...")
 f1 = f1_score(y, y_pred, average=None) # average='weighted')
 metrics2 = precision_recall_fscore_support(y_tmp, y_pred, average=None, beta=1)
 metrics05 = precision_recall_fscore_support(y_tmp, y_pred, average=None, beta=0.5)
 print(f1)
+
+print(json.dumps({ "time": t1 - t0, "f1": f1[1] }))
