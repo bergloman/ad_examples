@@ -1,23 +1,23 @@
 #! /bin/bash
 
-#ALGOS=("loda" "lof" "ifor")
-# TYPES=("type-b" "type-e" "type-r" "type-be" "type-br" "type-er" "type-ber")
-# SOURCES=("huge" "complex" "simple" "single")
-DATA_TYPES=("csv" "csv_normalized_hours")
+# ALGOS=("loda" "lof" "ifor")
+TYPES=("type1" "type2" "type3" "type12" "type13" "type23" "type123")
+SOURCES=("huge" "complex" "simple" "single")
+DATA_TYPES=("csv")
 
-ALGOS=("ifor" "lof")
-TYPES=("type-e" "type-ber")
-SOURCES=("simple")
-# DATA_TYPES=("csv_normalized_hours")
+ALGOS=("loda")
+# TYPES=("type1")
+# SOURCES=("simple")
+# DATA_TYPES=("csv")
 
-OUTPUT_DIR=out
+OUTPUT_DIR=out/datacenter
 mkdir -p $OUTPUT_DIR
 
 for DATA_TYPE in "${DATA_TYPES[@]}"
 do
     for TYPE in "${TYPES[@]}"
     do
-        DIR=data/data_parking/$DATA_TYPE/$TYPE
+        DIR=data/data_datacenter/$DATA_TYPE/$TYPE
         mkdir -p $DIR
         PIDS=""
 
