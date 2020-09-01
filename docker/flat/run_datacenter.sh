@@ -1,11 +1,11 @@
 #! /bin/bash
 
-# ALGOS=("loda" "lof" "ifor")
+ALGOS=("loda" "lof" "ifor")
 TYPES=("type1" "type2" "type3" "type12" "type13" "type23" "type123")
 SOURCES=("huge" "complex" "simple" "single")
-DATA_TYPES=("csv")
+DATA_TYPES=("csv" "csv_normalized_hours")
 
-ALGOS=("loda")
+# ALGOS=("loda")
 # TYPES=("type1")
 # SOURCES=("simple")
 # DATA_TYPES=("csv")
