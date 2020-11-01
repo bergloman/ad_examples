@@ -2,7 +2,7 @@
 
 ALGOS=("loda" "lof" "ifor")
 TYPES=("type-b" "type-e" "type-r" "type-be" "type-br" "type-er" "type-ber")
-SOURCES=("huge" "complex" "simple" "single")
+SOURCES=("complex" "moderate" "simple" "single")
 DATA_TYPES=("csv" "csv_normalized_hours")
 
 # ALGOS=("ifor" "lof")
