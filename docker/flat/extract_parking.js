@@ -5,11 +5,13 @@
 
 const fs = require("fs");
 
-const sizes = ["single", "simple", "complex", "huge"];
+const sizes = ["single", "simple", "moderate", "complex"];
 const types = ["type-b", "type-e", "type-r", "type-be", "type-br", "type-er", "type-ber"];
 const algos = ["loda", "lof", "ifor"];
-const csv_type = "csv";
-//const csv_type = "csv_normalized_hours";
+let csv_type = "csv";
+if (process.argv.length > 2 && process.argv[2] == "normalized") {
+    csv_type = "csv_normalized_hours";
+}
 const decimals = 3;
 
 const res = [];
