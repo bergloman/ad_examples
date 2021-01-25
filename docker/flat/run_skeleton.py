@@ -102,7 +102,7 @@ def run_ad_algorithm(algo_type, x_old, scores_old, x_new, outliers_fraction):
     ad = IsolationForest(
         n_estimators=70,
         max_samples='auto',
-        contamination=0.01,
+        contamination=0.005,
         max_features=1.0,
         bootstrap=False,
         # n_jobs=-1,
@@ -136,7 +136,6 @@ def run_ad_algorithm(algo_type, x_old, scores_old, x_new, outliers_fraction):
     # )
 
     print("fitting...")
-    print(x_old)
     ad.fit(x_old)
 
     print("predicting...")
@@ -160,7 +159,7 @@ algo=args[2]
 (gt_x, gt_y) = load_data(args[1])
 
 day_rec_cnt = 24 * 12
-block_size = 170 * day_rec_cnt
+block_size = 70 * day_rec_cnt
 idx_start = 160 * day_rec_cnt
 idx_curr_time = idx_start
 n = gt_y.shape[0]
@@ -211,3 +210,7 @@ print(f1)
 print(prec2)
 print(recall2)
 print(f05)
+
+print("Calculating F1 scores last time...")
+f1 = f1_score(y, y_pred, pos_label=True)
+print(f1)
